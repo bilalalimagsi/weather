@@ -1,0 +1,101 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="sheet.css">
+</head>
+<body>
+    <div class="card">
+        <div class="search">
+            <input type="text" placeholder="Enter city name" id="cityInput" spellcheck="false">
+            <button id="searchButton"><img src="search.png" alt="Search"></button>
+        </div>
+        <div class="error" id="errorBox">
+            <p>Invalid City Name</p>
+        </div>
+        <div class="weather" id="weatherBox">
+            <img src="" alt="Weather Icon" class="weather-icon">
+            <h1 class="temp">22°C</h1>
+            <h2 class="city">New York</h2>
+            <div class="details">
+                <div class="col">
+                    <img src="humidity.png" alt="Humidity Icon">
+                    <div>
+                        <p class="humidity">50%</p>
+                        <p>Humidity</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <img src="WindyV2.svg" alt="Wind Icon">
+                    <div>
+                        <p class="wind">15 km/h</p>
+                        <p>Wind Speed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include your JavaScript at the end of the HTML body to ensure DOM elements are available -->
+    <script>
+        const apiKey = "0a48b668e626af49977372adc325c9d5";
+        const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+
+        const searchBox = document.getElementById("cityInput");
+        const searchButton = document.getElementById("searchButton");
+        const weatherIcon = document.querySelector(".weather-icon");
+        const errorBox = document.getElementById("errorBox");
+        const weatherBox = document.getElementById("weatherBox");
+
+        async function checkWeather(city) {
+            try {
+                const response = await fetch(`${apiUrl}${city}&appid=${apiKey}`);
+
+                if (response.status === 404) {
+                    errorBox.style.display = "block";
+                    weatherBox.style.display = "none";
+                } else {
+                    const data = await response.json();
+
+                    document.querySelector(".city").innerHTML = data.name;
+                    document.querySelector(".temp").innerHTML = `${Math.round(data.main.temp)}°C`;
+                    document.querySelector(".humidity").innerHTML = `${data.main.humidity}%`;
+                    document.querySelector(".wind").innerHTML = `${data.wind.speed} km/h`;
+
+                    // Update weather icon based on weather condition
+                    if (data.weather[0].main === "Clouds") {
+                        weatherIcon.src = "CloudyV3.svg";
+                    } else if (data.weather[0].main === "Clear") {
+                        weatherIcon.src = "SunnyDayV3.svg";
+                    } else if (data.weather[0].main === "Rain") {
+                        weatherIcon.src = "rain.svg";
+                    } else if (data.weather[0].main === "Snow") {
+                        weatherIcon.src = "snow.svg";
+                    } else if (data.weather[0].main === "Mist") {
+                        weatherIcon.src = "mist.svg";
+                    }
+
+                    weatherBox.style.display = "block";
+                    errorBox.style.display = "none";
+                }
+            } catch (error) {
+                console.error("Error fetching weather data:", error);
+            }
+        }
+
+        searchButton.addEventListener("click", () => {
+            const city = searchBox.value;
+            if (city.trim() !== "") {
+                checkWeather(city);
+            }
+        });
+
+        // Call checkWeather with a default city when the page loads
+        checkWeather("New York");
+    </script>
+</body>
+</html>
